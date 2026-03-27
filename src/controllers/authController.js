@@ -1,8 +1,4 @@
-import jwt from 'jsonwebtoken';
-import { config } from '../config/index.js';
-import * as userService from '../services/userService.js';
-import * as otpService from '../services/otpService.js';
-import * as emailService from '../services/emailService.js';
+import * as firebaseAuthService from '../services/firebaseAuthService.js';
 
 
 export async function register(req, res) {
@@ -23,8 +19,7 @@ export async function register(req, res) {
       });
     }
 
-    const user = await userService.createUser({ email, password, name });
-    await emailService.sendWelcomeEmail(user.email, user.name);
+    const user = await firebaseAuthService.registerUser({ email, password, name });
 
     return res.status(201).json({
       success: true,
@@ -32,114 +27,51 @@ export async function register(req, res) {
       user,
     });
   } catch (error) {
-    if (error.message === 'El email ya está registrado') {
-      return res.status(409).json({ success: false, error: error.message });
+    const readableError = firebaseAuthService.getReadableFirebaseError(error);
+    if (readableError === 'El email ya está registrado') {
+      return res.status(409).json({ success: false, error: readableError });
+    }
+    if (readableError === 'La contraseña debe tener al menos 6 caracteres') {
+      return res.status(400).json({ success: false, error: readableError });
     }
     console.error('Error en registro:', error);
-    return res.status(500).json({ success: false, error: 'Error al registrar usuario' });
+    return res.status(500).json({ success: false, error: readableError });
   }
 }
 
-export async function requestOtp(req, res) {
+export async function login(req, res) {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    if (!email) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        error: 'El email es requerido',
+        error: 'Email y contraseña son requeridos',
       });
     }
 
-    const user = userService.findByEmail(email);
-    if (!user) {
-      // Por seguridad, no revelamos si el email existe o no
-      return res.status(200).json({
-        success: true,
-        message: 'Si el email está registrado, recibirás un código de verificación',
-      });
-    }
-
-    const { otp } = otpService.createOtp(email);
-    await emailService.sendOtpEmail(email, otp);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Si el email está registrado, recibirás un código de verificación',
-    });
-  } catch (error) {
-    console.error('Error al solicitar OTP:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Error al enviar el código de verificación',
-    });
-  }
-}
-
-
-export async function verifyOtp(req, res) {
-  try {
-    const { email, code } = req.body;
-
-    if (!email || !code) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email y código son requeridos',
-      });
-    }
-
-    const result = otpService.verifyOtp(email, code);
-
-    if (!result.valid) {
-      return res.status(400).json({
-        success: false,
-        error: result.error,
-      });
-    }
-
-    const user = userService.findByEmail(email);
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Usuario no encontrado',
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      config.jwtSecret,
-      { expiresIn: '7d' }
-    );
-
-    const { password: _, ...userWithoutPassword } = user;
+    const user = await firebaseAuthService.loginUser({ email, password });
 
     return res.status(200).json({
       success: true,
       message: 'Inicio de sesión exitoso',
-      token,
-      user: userWithoutPassword,
+      user,
     });
   } catch (error) {
-    console.error('Error al verificar OTP:', error);
-    return res.status(500).json({
+    const readableError = firebaseAuthService.getReadableFirebaseError(error);
+    const statusCode = readableError === 'Credenciales inválidas' ? 401 : 500;
+    return res.status(statusCode).json({
       success: false,
-      error: 'Error al verificar el código',
+      error: readableError,
     });
   }
 }
 
-
 export async function me(req, res) {
   try {
-    const user = userService.findByEmail(req.user.email);
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
     return res.status(200).json({
       success: true,
-      user: userWithoutPassword,
+      user: req.user,
     });
   } catch (error) {
     console.error('Error en /me:', error);

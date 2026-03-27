@@ -1,7 +1,7 @@
 {
   "name": "backend-apps-1",
   "version": "1.0.0",
-  "description": "API de autenticación con OTP",
+  "description": "API de autenticación con Firebase Auth",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -13,11 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.2",
-    "resend": "^4.0.0",
-    "uuid": "^10.0.0"
+    "resend": "^4.0.0"
   }
 }

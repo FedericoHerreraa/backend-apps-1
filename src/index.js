@@ -12,9 +12,8 @@ app.get('/', (req, res) => {
     message: 'API de autenticación',
     endpoints: {
       register: 'POST /auth/register',
-      requestOtp: 'POST /auth/login/request-otp',
-      verifyOtp: 'POST /auth/login/verify-otp',
-      me: 'GET /auth/me (requiere Authorization: Bearer <token>)',
+      login: 'POST /auth/login',
+      me: 'GET /auth/me (requiere Authorization: Bearer <firebase_id_token>)',
     },
   });
 });

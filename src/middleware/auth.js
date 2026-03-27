@@ -1,5 +1,4 @@
-import jwt from 'jsonwebtoken';
-import { config } from '../config/index.js';
+import * as firebaseAuthService from '../services/firebaseAuthService.js';
 
 
 export function authenticate(req, res, next) {
@@ -14,14 +13,16 @@ export function authenticate(req, res, next) {
 
   const token = authHeader.split(' ')[1];
 
-  try {
-    const decoded = jwt.verify(token, config.jwtSecret);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      error: 'Token inválido o expirado',
+  firebaseAuthService
+    .getUserByIdToken(token)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch(() => {
+      return res.status(401).json({
+        success: false,
+        error: 'Token inválido o expirado',
+      });
     });
-  }
 }
