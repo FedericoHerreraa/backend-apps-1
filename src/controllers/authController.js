@@ -58,6 +58,7 @@ export async function login(req, res) {
       user,
     });
   } catch (error) {
+    console.error('Error en login:', error?.message || error, error?.code != null ? `(code: ${error.code})` : '');
     const readableError = firebaseAuthService.getReadableFirebaseError(error);
     const statusCode = readableError === 'Credenciales inválidas' ? 401 : 500;
     return res.status(statusCode).json({

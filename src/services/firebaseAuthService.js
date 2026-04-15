@@ -1,4 +1,5 @@
 import { config } from '../config/index.js';
+import * as firestoreUserService from './firestoreUserService.js';
 
 const FIREBASE_AUTH_BASE_URL = 'https://identitytoolkit.googleapis.com/v1/accounts';
 
@@ -28,8 +29,9 @@ async function firebaseAuthRequest(endpoint, payload) {
   return data;
 }
 
-function mapFirebaseError(errorCode) {
-  const code = (errorCode || '').toUpperCase();
+function mapFirebaseError(error) {
+  const raw = error?.code ?? error?.message ?? '';
+  const code = String(raw).toUpperCase();
 
   switch (code) {
     case 'EMAIL_EXISTS':
@@ -48,6 +50,16 @@ function mapFirebaseError(errorCode) {
     case 'INVALID_ID_TOKEN':
     case 'TOKEN_EXPIRED':
       return 'Token inválido o expirado';
+    case 'OPERATION_NOT_ALLOWED':
+      return 'El inicio de sesión con email/contraseña no está habilitado en Firebase';
+    case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+      return 'Demasiados intentos. Probá de nuevo más tarde';
+    case '7':
+    case 'PERMISSION_DENIED':
+      return 'Sin permiso para acceder a Firestore (revisá la cuenta de servicio y el proyecto)';
+    case '5':
+    case 'NOT_FOUND':
+      return 'Recurso no encontrado en Firestore';
     default:
       return 'Error de autenticación con Firebase';
   }
@@ -68,10 +80,16 @@ export async function registerUser({ email, password, name }) {
     });
   }
 
+  const displayName = name || null;
+  await firestoreUserService.createUserDocument(registerData.localId, {
+    email: registerData.email,
+    displayName,
+  });
+
   return {
     uid: registerData.localId,
     email: registerData.email,
-    displayName: name || null,
+    displayName,
     idToken: registerData.idToken,
     refreshToken: registerData.refreshToken,
     expiresIn: registerData.expiresIn,
@@ -85,10 +103,15 @@ export async function loginUser({ email, password }) {
     returnSecureToken: true,
   });
 
-  return {
-    uid: loginData.localId,
+  const profile = await firestoreUserService.ensureUserDocument(loginData.localId, {
     email: loginData.email,
     displayName: loginData.displayName || null,
+  });
+
+  return {
+    uid: profile.uid,
+    email: profile.email,
+    displayName: profile.displayName,
     idToken: loginData.idToken,
     refreshToken: loginData.refreshToken,
     expiresIn: loginData.expiresIn,
@@ -116,5 +139,5 @@ export async function getUserByIdToken(idToken) {
 }
 
 export function getReadableFirebaseError(error) {
-  return mapFirebaseError(error?.code || error?.message);
+  return mapFirebaseError(error);
 }

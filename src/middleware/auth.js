@@ -1,4 +1,5 @@
 import * as firebaseAuthService from '../services/firebaseAuthService.js';
+import * as firestoreUserService from '../services/firestoreUserService.js';
 
 
 export function authenticate(req, res, next) {
@@ -15,9 +16,24 @@ export function authenticate(req, res, next) {
 
   firebaseAuthService
     .getUserByIdToken(token)
-    .then((user) => {
-      req.user = user;
-      next();
+    .then(async (authUser) => {
+      try {
+        const profile = await firestoreUserService.ensureUserDocument(authUser.uid, {
+          email: authUser.email,
+          displayName: authUser.displayName || null,
+        });
+        req.user = {
+          ...profile,
+          emailVerified: authUser.emailVerified,
+        };
+        next();
+      } catch (err) {
+        console.error('Error cargando perfil desde Firestore:', err);
+        return res.status(500).json({
+          success: false,
+          error: 'Error al cargar el perfil de usuario',
+        });
+      }
     })
     .catch(() => {
       return res.status(401).json({

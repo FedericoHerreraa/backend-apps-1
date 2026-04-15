@@ -4,6 +4,7 @@ export const config = {
   port: process.env.PORT || 3000,
   firebase: {
     apiKey: process.env.FIREBASE_API_KEY,
+    serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
   },
   resend: {
     apiKey: process.env.RESEND_API_KEY,
