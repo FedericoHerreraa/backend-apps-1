@@ -77,3 +77,8 @@ export function getFirestore() {
   ensureFirebaseAdmin();
   return admin.firestore();
 }
+
+export function getAuth() {
+  ensureFirebaseAdmin();
+  return admin.auth();
+}

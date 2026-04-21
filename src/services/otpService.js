@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
 
 const otpStore = new Map();
@@ -13,14 +12,12 @@ function generateOtp() {
   return otp;
 }
 
-
 export function createOtp(email) {
+  const key = email.toLowerCase().trim();
   const otp = generateOtp();
-  const id = uuidv4();
   const expiresAt = new Date(Date.now() + config.otp.expiryMinutes * 60 * 1000);
 
-  otpStore.set(email.toLowerCase(), {
-    id,
+  otpStore.set(key, {
     otp,
     expiresAt,
     attempts: 0,
@@ -31,7 +28,8 @@ export function createOtp(email) {
 
 
 export function verifyOtp(email, code) {
-  const key = email.toLowerCase();
+  const key = email.toLowerCase().trim();
+  const normalizedCode = String(code ?? '').trim();
   const stored = otpStore.get(key);
 
   if (!stored) {
@@ -48,7 +46,7 @@ export function verifyOtp(email, code) {
     return { valid: false, error: 'Demasiados intentos fallidos' };
   }
 
-  if (stored.otp !== code) {
+  if (stored.otp !== normalizedCode) {
     stored.attempts += 1;
     return { valid: false, error: 'Código incorrecto' };
   }

@@ -1,20 +1,59 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
 
-const resend = config.resend.apiKey ? new Resend(config.resend.apiKey) : null;
+let transporter = null;
 
+function getTransporter() {
+  const { smtpUser, smtpPass } = config.mail;
+  if (!smtpUser || !smtpPass) {
+    return null;
+  }
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: config.mail.smtpHost,
+      port: config.mail.smtpPort,
+      secure: config.mail.smtpSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+  }
+  return transporter;
+}
+
+function resolveFrom() {
+  if (config.mail.from) {
+    return config.mail.from;
+  }
+  return `"${config.mail.fromName}" <${config.mail.smtpUser}>`;
+}
+
+async function sendMail(to, subject, html) {
+  const transport = getTransporter();
+  if (!transport) {
+    return false;
+  }
+  await transport.sendMail({
+    from: resolveFrom(),
+    to,
+    subject,
+    html,
+  });
+  return true;
+}
 
 export async function sendOtpEmail(to, otpCode) {
-  if (!resend) {
-    console.warn('RESEND_API_KEY no configurada. OTP simulado:', otpCode);
+  const transport = getTransporter();
+  if (!transport) {
+    console.warn(
+      'SMTP no configurado (SMTP_USER / SMTP_PASS). OTP solo en consola:',
+      otpCode,
+    );
     return { success: true, simulated: true };
   }
 
-  const { data, error } = await resend.emails.send({
-    from: config.resend.fromEmail,
-    to: [to],
-    subject: 'Tu código de verificación',
-    html: `
+  const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Código de verificación</h2>
         <p>Tu código para iniciar sesión es:</p>
@@ -24,40 +63,36 @@ export async function sendOtpEmail(to, otpCode) {
         <p style="color: #666;">Este código expira en 10 minutos.</p>
         <p style="color: #999; font-size: 12px;">Si no solicitaste este código, ignora este email.</p>
       </div>
-    `,
-  });
+    `;
 
-  if (error) {
-    throw new Error(`Error al enviar email: ${error.message}`);
+  try {
+    await sendMail(to, 'Tu código de verificación', html);
+    return { success: true };
+  } catch (err) {
+    console.error('Error enviando OTP por SMTP:', err);
+    throw new Error(err?.message || 'Error al enviar el email');
   }
-
-  return { success: true, data };
 }
 
-
 export async function sendWelcomeEmail(to, name) {
-  if (!resend) {
-    console.warn('RESEND_API_KEY no configurada. Email de bienvenida no enviado.');
+  if (!getTransporter()) {
+    console.warn('SMTP no configurado. Email de bienvenida no enviado.');
     return { success: true, simulated: true };
   }
 
-  const { data, error } = await resend.emails.send({
-    from: config.resend.fromEmail,
-    to: [to],
-    subject: '¡Bienvenido!',
-    html: `
+  const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">¡Bienvenido${name ? `, ${name}` : ''}!</h2>
         <p>Tu cuenta ha sido creada correctamente.</p>
-        <p>Ya puedes iniciar sesión solicitando un código OTP a tu email.</p>
+        <p>Ya podés iniciar sesión solicitando un código OTP a tu email.</p>
       </div>
-    `,
-  });
+    `;
 
-  if (error) {
-    console.error('Error al enviar email de bienvenida:', error);
+  try {
+    await sendMail(to, '¡Bienvenido!', html);
+    return { success: true };
+  } catch (err) {
+    console.error('Error al enviar email de bienvenida:', err);
     return { success: false };
   }
-
-  return { success: true, data };
 }

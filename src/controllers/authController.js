@@ -1,4 +1,8 @@
 import * as firebaseAuthService from '../services/firebaseAuthService.js';
+import * as otpService from '../services/otpService.js';
+import * as emailService from '../services/emailService.js';
+import * as otpSessionService from '../services/otpSessionService.js';
+import { isValidEmail } from '../utils/email.js';
 
 
 export async function register(req, res) {
@@ -64,6 +68,80 @@ export async function login(req, res) {
     return res.status(statusCode).json({
       success: false,
       error: readableError,
+    });
+  }
+}
+
+export async function sendOtp(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email inválido',
+      });
+    }
+
+    const normalized = email.toLowerCase().trim();
+    const { otp } = otpService.createOtp(normalized);
+    await emailService.sendOtpEmail(normalized, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Si el correo es válido, recibirás un código en los próximos minutos.',
+    });
+  } catch (error) {
+    console.error('Error enviando OTP:', error);
+    return res.status(500).json({
+      success: false,
+      error: error?.message || 'No se pudo enviar el código',
+    });
+  }
+}
+
+export async function verifyOtpAndSignIn(req, res) {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email inválido',
+      });
+    }
+
+    if (code == null || String(code).trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'El código es requerido',
+      });
+    }
+
+    const normalized = email.toLowerCase().trim();
+    const result = otpService.verifyOtp(normalized, code);
+
+    if (!result.valid) {
+      const status = result.error === 'Demasiados intentos fallidos' ? 429 : 401;
+      return res.status(status).json({
+        success: false,
+        error: result.error,
+      });
+    }
+
+    const { customToken, user } = await otpSessionService.createSessionAfterOtpVerified(normalized);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Inicio de sesión correcto',
+      customToken,
+      user,
+    });
+  } catch (error) {
+    console.error('Error en verify OTP:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'No se pudo completar el inicio de sesión',
     });
   }
 }
