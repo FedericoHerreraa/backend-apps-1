@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config/index.js';
 import authRoutes from './routes/auth.js';
+import profileRoutes from './routes/profile.js';
 
 const app = express();
 
@@ -17,6 +18,7 @@ const corsOptions =
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -28,6 +30,9 @@ app.get('/', (req, res) => {
       otpVerify:
         'POST /auth/otp/verify { email, code } → customToken (signInWithCustomToken en el cliente)',
       me: 'GET /auth/me (requiere Authorization: Bearer <firebase_id_token>)',
+      profileGet: 'GET /profile/me (requiere Authorization: Bearer <firebase_id_token>)',
+      profileUpdate:
+        'PUT /profile/me { name?, phone?, preferences? } (requiere Authorization: Bearer <firebase_id_token>)',
     },
   });
 });
