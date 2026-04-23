@@ -3,6 +3,7 @@ import cors from 'cors';
 import { config } from './config/index.js';
 import authRoutes from './routes/auth.js';
 import profileRoutes from './routes/profile.js';
+import reservasRoutes from './routes/reservas.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
+app.use('/reservas', reservasRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -33,6 +35,11 @@ app.get('/', (req, res) => {
       profileGet: 'GET /profile/me (requiere Authorization: Bearer <firebase_id_token>)',
       profileUpdate:
         'PUT /profile/me { name?, phone?, preferences? } (requiere Authorization: Bearer <firebase_id_token>)',
+      reservasList: 'GET /reservas (requiere Authorization: Bearer <firebase_id_token>)',
+      reservasCreate:
+        'POST /reservas { actividadId, actividadNombre, fecha, cantidadPersonas, totalPrecio? } (requiere Authorization: Bearer <firebase_id_token>)',
+      reservasCancel:
+        'PATCH /reservas/:id/cancelar (requiere Authorization: Bearer <firebase_id_token>)',
     },
   });
 });
