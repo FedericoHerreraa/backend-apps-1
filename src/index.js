@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config/index.js';
 import authRoutes from './routes/auth.js';
+import actividadesRoutes from './routes/actividadesRoutes.js';
 
 const app = express();
 
@@ -17,6 +18,7 @@ const corsOptions =
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/auth', authRoutes);
+app.use('/actividades', actividadesRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -25,9 +27,11 @@ app.get('/', (req, res) => {
       register: 'POST /auth/register',
       login: 'POST /auth/login',
       otpSend: 'POST /auth/otp/send { email }',
-      otpVerify:
-        'POST /auth/otp/verify { email, code } → customToken (signInWithCustomToken en el cliente)',
+      otpVerify: 'POST /auth/otp/verify { email, code }',
       me: 'GET /auth/me (requiere Authorization: Bearer <firebase_id_token>)',
+      actividades: 'GET /actividades',
+      actividadById: 'GET /actividades/:id',
+      recomendadas: 'GET /actividades/recomendadas?preferencias=aventura,cultura',
     },
   });
 });
