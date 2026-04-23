@@ -34,8 +34,8 @@ app.get('/', (req, res) => {
       actividades: 'GET /actividades',
       actividadById: 'GET /actividades/:id',
       recomendadas: 'GET /actividades/recomendadas?preferencias=aventura,cultura',
-      profileGet: 'GET /profile/me',
-      profileUpdate: 'PUT /profile/me',
+      profileGet: 'GET /profile/me (requiere Authorization: Bearer <firebase_id_token>)',
+      profileUpdate: 'PUT /profile/me { name?, phone?, preferences? }',
     },
   });
 });
