@@ -13,7 +13,7 @@ const actividades = [
     precio: 0,
     cupos_disponibles: 20,
     politica_cancelacion: "Cancelación gratuita hasta 24hs antes",
-    imagen: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Obelisco_buenosaires.jpg/800px-Obelisco_buenosaires.jpg",
+    imagen: "https://picsum.photos/id/1018/800/600",
     destacada: true
   },
   {
@@ -30,7 +30,7 @@ const actividades = [
     precio: 45000,
     cupos_disponibles: 15,
     politica_cancelacion: "Cancelación gratuita hasta 48hs antes",
-    imagen: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Iguasu_falls_argentina_side.jpg/800px-Iguasu_falls_argentina_side.jpg",
+    imagen: "https://picsum.photos/id/1043/800/600",
     destacada: true
   },
   {
@@ -47,7 +47,7 @@ const actividades = [
     precio: 18000,
     cupos_disponibles: 10,
     politica_cancelacion: "Cancelación gratuita hasta 24hs antes",
-    imagen: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Palermo_Soho_Buenos_Aires.jpg/800px-Palermo_Soho_Buenos_Aires.jpg",
+    imagen: "https://picsum.photos/id/292/800/600",
     destacada: false
   },
   {
@@ -64,7 +64,7 @@ const actividades = [
     precio: 35000,
     cupos_disponibles: 8,
     politica_cancelacion: "Sin reembolso por cancelación",
-    imagen: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Aconcagua_desde_el_oeste.jpg/800px-Aconcagua_desde_el_oeste.jpg",
+    imagen: "https://picsum.photos/id/29/800/600",
     destacada: true
   },
   {
@@ -81,7 +81,7 @@ const actividades = [
     precio: 8000,
     cupos_disponibles: 25,
     politica_cancelacion: "Cancelación gratuita hasta 12hs antes",
-    imagen: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MALBA.jpg/800px-MALBA.jpg",
+    imagen: "https://picsum.photos/id/137/800/600",
     destacada: false
   }
 ];
