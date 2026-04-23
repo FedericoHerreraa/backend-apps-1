@@ -3,6 +3,7 @@ import cors from 'cors';
 import { config } from './config/index.js';
 import authRoutes from './routes/auth.js';
 import actividadesRoutes from './routes/actividadesRoutes.js';
+import profileRoutes from './routes/profile.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/actividades', actividadesRoutes);
+app.use('/profile', profileRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -32,6 +34,8 @@ app.get('/', (req, res) => {
       actividades: 'GET /actividades',
       actividadById: 'GET /actividades/:id',
       recomendadas: 'GET /actividades/recomendadas?preferencias=aventura,cultura',
+      profileGet: 'GET /profile/me',
+      profileUpdate: 'PUT /profile/me',
     },
   });
 });
