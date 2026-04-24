@@ -133,6 +133,14 @@ export async function getActividadById(req, res) {
   }
 }
 
+export function actividadExistsById(rawId) {
+  const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
+  if (!Number.isInteger(id) || id < 1) {
+    return false;
+  }
+  return actividades.some((a) => a.id === id);
+}
+
 export async function getRecomendadas(req, res) {
   try {
     const { preferencias } = req.query;
