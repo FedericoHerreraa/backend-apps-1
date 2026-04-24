@@ -41,6 +41,9 @@ app.get('/', (req, res) => {
       profileGet: 'GET /profile/me',
       profileUpdate: 'PUT /profile/me',
       historialReview: 'POST /usuarios/historial/review (Bearer) { actividadId, calificacionActividad, calificacionGuia, comentario }',
+      reservasGet: 'GET /reservas (Bearer)',
+      reservasCreate: 'POST /reservas (Bearer) { actividadId, ... }',
+      reservasCancel: 'PATCH /reservas/:id/cancelar (Bearer)'
     },
   });
 });
