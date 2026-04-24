@@ -4,6 +4,7 @@ import { config } from './config/index.js';
 import authRoutes from './routes/auth.js';
 import actividadesRoutes from './routes/actividadesRoutes.js';
 import profileRoutes from './routes/profile.js';
+import usuariosHistorialRoutes from './routes/usuariosHistorial.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/actividades', actividadesRoutes);
 app.use('/profile', profileRoutes);
+app.use('/usuarios/historial', usuariosHistorialRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -36,6 +38,7 @@ app.get('/', (req, res) => {
       recomendadas: 'GET /actividades/recomendadas',
       profileGet: 'GET /profile/me',
       profileUpdate: 'PUT /profile/me',
+      historialReview: 'POST /usuarios/historial/review (Bearer) { actividadId, calificacionActividad, calificacionGuia, comentario }',
     },
   });
 });
