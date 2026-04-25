@@ -6,6 +6,7 @@ import actividadesRoutes from './routes/actividadesRoutes.js';
 import profileRoutes from './routes/profile.js';
 import usuariosHistorialRoutes from './routes/usuariosHistorial.js';
 import reservasRoutes from './routes/reservas.js';
+import https from 'https'
 
 const app = express();
 
@@ -54,4 +55,16 @@ app.use((req, res) => {
 
 app.listen(config.port, () => {
   console.log(`Servidor en http://localhost:${config.port}`);
+
+  const keepAlive = () => {
+    const url = 'https://backend-apps-1.onrender.com';
+    
+    https.get(url, (res) => {
+      console.log(`Keep-alive ping: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('Keep-alive error:', err.message);
+    });
+  };
+  
+  setInterval(keepAlive, 10 * 60 * 1000);
 });
