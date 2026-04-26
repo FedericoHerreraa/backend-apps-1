@@ -4,6 +4,16 @@ import { getFirestore } from './firebaseAdmin.js';
 const RESERVAS_COLLECTION = 'reservas';
 const ACTIVIDADES_COLLECTION = 'actividades';
 
+function calcularEstado(reserva) {
+  if (reserva.estado === 'cancelada') return 'cancelada';
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const fechaReserva = new Date(reserva.fecha);
+  fechaReserva.setHours(0, 0, 0, 0);
+  if (fechaReserva < hoy) return 'finalizada';
+  return 'confirmada';
+}
+
 export async function getReservasByUserId(userId) {
   const db = getFirestore();
   const snapshot = await db
@@ -11,48 +21,27 @@ export async function getReservasByUserId(userId) {
     .where('userId', '==', userId)
     .get();
 
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      estado: calcularEstado(data),
+    };
+  });
 }
 
 export async function createReserva(userId, data) {
-  const { actividadId, fecha, horario, cantidadParticipantes } = data;
   const db = getFirestore();
 
-  const actividadRef = db.collection(ACTIVIDADES_COLLECTION).doc(String(actividadId));
-  const actividadSnap = await actividadRef.get();
-
-  if (!actividadSnap.exists) {
-    const err = new Error('Actividad no encontrada');
-    err.statusCode = 404;
-    throw err;
-  }
-
-  const actividad = actividadSnap.data();
-
-  if (actividad.cuposDisponibles < cantidadParticipantes) {
-    const err = new Error('Sin cupos disponibles');
-    err.statusCode = 400;
-    throw err;
-  }
-
   const nuevaReserva = {
-    actividadId,
-    actividadNombre: actividad.actividadNombre ?? actividad.nombre ?? null,
-    fecha,
-    horario,
-    cantidadParticipantes,
+    ...data,
     estado: 'confirmada',
     userId,
-    politicaCancelacion: actividad.politicaCancelacion ?? actividad.politica_cancelacion ?? null,
-    cuposDisponibles: actividad.cuposDisponibles - cantidadParticipantes,
     creadoEn: FieldValue.serverTimestamp(),
   };
 
   const reservaRef = await db.collection(RESERVAS_COLLECTION).add(nuevaReserva);
-
-  await actividadRef.update({
-    cuposDisponibles: FieldValue.increment(-cantidadParticipantes),
-  });
 
   const reservaSnap = await reservaRef.get();
   return { id: reservaRef.id, ...reservaSnap.data() };
