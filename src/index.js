@@ -6,6 +6,7 @@ import actividadesRoutes from './routes/actividadesRoutes.js';
 import profileRoutes from './routes/profile.js';
 import usuariosHistorialRoutes from './routes/usuariosHistorial.js';
 import reservasRoutes from './routes/reservas.js';
+import favoritosRoutes from './routes/favoritos.js';
 import https from 'https'
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/actividades', actividadesRoutes);
 app.use('/profile', profileRoutes);
 app.use('/usuarios/historial', usuariosHistorialRoutes);
 app.use('/reservas', reservasRoutes);
+app.use('/favoritos', favoritosRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -44,7 +46,11 @@ app.get('/', (req, res) => {
       historialReview: 'POST /usuarios/historial/review (Bearer) { actividadId, calificacionActividad, calificacionGuia, comentario }',
       reservasGet: 'GET /reservas (Bearer)',
       reservasCreate: 'POST /reservas (Bearer) { actividadId, ... }',
-      reservasCancel: 'PATCH /reservas/:id/cancelar (Bearer)'
+      reservasCancel: 'PATCH /reservas/:id/cancelar (Bearer)',
+      favoritosGet: 'GET /favoritos (Bearer) → lista con flag tieneNovedad',
+      favoritosAdd: 'POST /favoritos/:actividadId (Bearer)',
+      favoritosRemove: 'DELETE /favoritos/:actividadId (Bearer)',
+      favoritosCheck: 'GET /favoritos/:actividadId/check (Bearer) → { esFavorito }'
     },
   });
 });
