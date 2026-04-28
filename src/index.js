@@ -7,6 +7,7 @@ import profileRoutes from './routes/profile.js';
 import usuariosHistorialRoutes from './routes/usuariosHistorial.js';
 import reservasRoutes from './routes/reservas.js';
 import favoritosRoutes from './routes/favoritos.js';
+import noticiasRoutes from './routes/noticias.js';
 import https from 'https'
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/profile', profileRoutes);
 app.use('/usuarios/historial', usuariosHistorialRoutes);
 app.use('/reservas', reservasRoutes);
 app.use('/favoritos', favoritosRoutes);
+app.use('/noticias', noticiasRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -50,7 +52,8 @@ app.get('/', (req, res) => {
       favoritosGet: 'GET /favoritos (Bearer) → lista con flag tieneNovedad',
       favoritosAdd: 'POST /favoritos/:actividadId (Bearer)',
       favoritosRemove: 'DELETE /favoritos/:actividadId (Bearer)',
-      favoritosCheck: 'GET /favoritos/:actividadId/check (Bearer) → { esFavorito }'
+      favoritosCheck: 'GET /favoritos/:actividadId/check (Bearer) → { esFavorito }',
+      noticias: 'GET /noticias'
     },
   });
 });
