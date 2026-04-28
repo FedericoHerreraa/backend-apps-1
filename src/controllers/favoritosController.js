@@ -10,6 +10,7 @@ function parseActividadId(raw) {
   return id;
 }
 
+
 export async function getMisFavoritos(req, res) {
   try {
     const favoritos = await firestoreFavoritosService.listFavoritosByUser(req.user.uid);
