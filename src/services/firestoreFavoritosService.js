@@ -35,15 +35,15 @@ export async function addFavorito(userId, actividadId) {
   await db.collection(FAVORITOS_COLLECTION).doc(docId).set({
     userId,
     actividadId: actividad.id ?? Number(actividadId),
-    precioAlGuardar: actividad.precio,
-    cuposAlGuardar: actividad.cupos_disponibles,
+    precioAlGuardar: actividad.precio ?? null,
+    cuposAlGuardar: actividad.cupos_disponibles ?? null,
     creadoEn: FieldValue.serverTimestamp(),
   });
 
   return {
     actividadId: actividad.id ?? Number(actividadId),
-    precioAlGuardar: actividad.precio,
-    cuposAlGuardar: actividad.cupos_disponibles,
+    precioAlGuardar: actividad.precio ?? null,
+    cuposAlGuardar: actividad.cupos_disponibles ?? null,
   };
 }
 
