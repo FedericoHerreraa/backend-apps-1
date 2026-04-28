@@ -23,6 +23,7 @@ export function authenticate(req, res, next) {
           displayName: authUser.displayName || null,
         });
         req.user = {
+          uid: authUser.uid,
           ...profile,
           emailVerified: authUser.emailVerified,
         };
