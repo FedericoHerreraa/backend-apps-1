@@ -50,13 +50,6 @@ export async function getActividadById(req, res) {
   }
 }
 
-export async function actividadExistsById(rawId) {
-  const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
-  if (!Number.isInteger(id) || id < 1) return false;
-  const doc = await db.collection('actividades').doc(String(id)).get();
-  return doc.exists;
-}
-
 export async function getRecomendadas(req, res) {
   try {
     const { preferencias } = req.query;
