@@ -1,4 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore';
+import { normalizeActividadForApi } from '../schemas/actividad.js';
 import { getFirestore } from './firebaseAdmin.js';
 
 const FAVORITOS_COLLECTION = 'favoritos';
@@ -104,7 +105,7 @@ export async function listFavoritosByUser(userId) {
         actividadDisponible: true,
         tieneNovedad: tipoNovedad !== null,
         tipoNovedad,
-        actividad,
+        actividad: normalizeActividadForApi(actividad),
       };
     }),
   );
