@@ -1,5 +1,5 @@
 import * as firestoreReviewService from '../services/firestoreReviewService.js';
-import { actividadExistsById } from './actividadesController.js';
+import { actividadExistsById } from '../services/actividadesService.js';
 
 const MIN_CAL = 1;
 const MAX_CAL = 5;
@@ -24,7 +24,7 @@ export async function postReview(req, res) {
       });
     }
 
-    if (!actividadExistsById(actividadId)) {
+    if (!(await actividadExistsById(actividadId))) {
       return res.status(404).json({
         success: false,
         error: 'Actividad no encontrada',
