@@ -8,21 +8,17 @@ import {
 export async function getActividades(req, res) {
   try {
     const { destino, categoria, precio_min, precio_max, destacadas, limit = 20, page = 1 } = req.query;
-
     let resultado = await getAllActividades();
-
     if (destino) resultado = resultado.filter(a => a.destino.toLowerCase().includes(destino.toLowerCase()));
     if (categoria) resultado = resultado.filter(a => a.categoria === categoria);
     if (precio_min) resultado = resultado.filter(a => a.precio >= parseFloat(precio_min));
     if (precio_max) resultado = resultado.filter(a => a.precio <= parseFloat(precio_max));
     if (destacadas) resultado = resultado.filter(a => a.destacada === true);
-
     const total = resultado.length;
     const total_pages = Math.ceil(total / parseInt(limit));
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const paginado = resultado.slice(offset, offset + parseInt(limit));
     const destacadasList = resultado.filter(a => a.destacada);
-
     return res.status(200).json({
       success: true,
       results: paginado,
@@ -40,11 +36,9 @@ export async function getActividadById(req, res) {
   try {
     const { id } = req.params;
     const actividad = await getActividadByIdService(id);
-
     if (!actividad) {
       return res.status(404).json({ success: false, error: 'Actividad no encontrada' });
     }
-
     return res.status(200).json({ success: true, ...actividad });
   } catch (error) {
     console.error('Error en getActividadById:', error);
@@ -57,14 +51,11 @@ export { actividadExistsById };
 export async function getRecomendadas(req, res) {
   try {
     const { preferencias } = req.query;
-
     if (!preferencias) {
       return res.status(400).json({ success: false, error: 'Preferencias requeridas' });
     }
-
     const prefs = preferencias.split(',');
     const recomendadas = await getActividadesByPreferencias(prefs);
-
     return res.status(200).json({ success: true, results: recomendadas });
   } catch (error) {
     console.error('Error en getRecomendadas:', error);
