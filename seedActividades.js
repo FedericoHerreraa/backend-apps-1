@@ -23,7 +23,7 @@ const actividades = [
     duracion: "3 horas",
     idioma: "Español",
     precio: 0,
-    cupos_disponibles: 20,
+    cuposDisponibles: 20,
     politica_cancelacion: "Cancelación gratuita hasta 24hs antes",
     imagen: "https://picsum.photos/id/1018/800/600",
     destacada: true
@@ -40,7 +40,7 @@ const actividades = [
     duracion: "8 horas",
     idioma: "Español / Inglés",
     precio: 45000,
-    cupos_disponibles: 15,
+    cuposDisponibles: 15,
     politica_cancelacion: "Cancelación gratuita hasta 48hs antes",
     imagen: "https://picsum.photos/id/1043/800/600",
     destacada: true
@@ -57,7 +57,7 @@ const actividades = [
     duracion: "4 horas",
     idioma: "Español",
     precio: 18000,
-    cupos_disponibles: 10,
+    cuposDisponibles: 10,
     politica_cancelacion: "Cancelación gratuita hasta 24hs antes",
     imagen: "https://picsum.photos/id/292/800/600",
     destacada: false
@@ -74,7 +74,7 @@ const actividades = [
     duracion: "10 horas",
     idioma: "Español / Inglés",
     precio: 35000,
-    cupos_disponibles: 8,
+    cuposDisponibles: 8,
     politica_cancelacion: "Sin reembolso por cancelación",
     imagen: "https://picsum.photos/id/29/800/600",
     destacada: true
@@ -91,7 +91,7 @@ const actividades = [
     duracion: "2 horas",
     idioma: "Español",
     precio: 8000,
-    cupos_disponibles: 25,
+    cuposDisponibles: 25,
     politica_cancelacion: "Cancelación gratuita hasta 12hs antes",
     imagen: "https://picsum.photos/id/137/800/600",
     destacada: false
