@@ -4,6 +4,7 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
+router.get('/review', authenticate, historialController.getReviewByUserAndActivity);
 router.post('/review', authenticate, historialController.postReview);
 
 export default router;

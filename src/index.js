@@ -46,6 +46,8 @@ app.get('/', (req, res) => {
       profileGet: 'GET /profile/me',
       profileUpdate: 'PUT /profile/me',
       historialReview: 'POST /usuarios/historial/review (Bearer) { actividadId, calificacionActividad, calificacionGuia, comentario }',
+      historialReviewGet:
+        'GET /usuarios/historial/review?userId=&actividadId= (Bearer) — userId debe ser el del token',
       reservasGet: 'GET /reservas (Bearer)',
       reservasCreate: 'POST /reservas (Bearer) { actividadId, ... }',
       reservasCancel: 'PATCH /reservas/:id/cancelar (Bearer)',

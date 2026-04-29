@@ -27,5 +27,38 @@ export async function upsertActivityReview(uid, payload) {
   await ref.set(data, { merge: true });
 
   const saved = await ref.get();
-  return saved.data();
+  return serializeReviewDoc(saved.data());
+}
+
+function tsToIso(t) {
+  if (t == null) return null;
+  if (typeof t.toDate === 'function') {
+    const d = t.toDate();
+    return d instanceof Date && !Number.isNaN(d.getTime()) ? d.toISOString() : null;
+  }
+  if (t instanceof Date) return t.toISOString();
+  return null;
+}
+
+function serializeReviewDoc(data) {
+  if (!data) return null;
+  return {
+    ...data,
+    createdAt: tsToIso(data.createdAt) ?? data.createdAt,
+    updatedAt: tsToIso(data.updatedAt) ?? data.updatedAt,
+  };
+}
+
+
+export async function getUserActivityReview(uid, actividadId) {
+  const db = getFirestore();
+  const docId = String(actividadId);
+  const ref = db
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(REVIEWS_SUBCOLLECTION)
+    .doc(docId);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  return serializeReviewDoc(snap.data());
 }
