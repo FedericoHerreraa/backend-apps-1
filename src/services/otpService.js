@@ -54,3 +54,19 @@ export function verifyOtp(email, code) {
   otpStore.delete(key);
   return { valid: true };
 }
+
+export function hasValidOtp(email) {
+  const key = email.toLowerCase().trim();
+  const stored = otpStore.get(key);
+
+  if (!stored) {
+    return false;
+  }
+
+  if (new Date() > stored.expiresAt) {
+    otpStore.delete(key);
+    return false;
+  }
+
+  return true;
+}

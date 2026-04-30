@@ -1,54 +1,48 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import { config } from '../config/index.js';
 
-let transporter = null;
-
-function getTransporter() {
-  const { smtpUser, smtpPass } = config.mail;
-  if (!smtpUser || !smtpPass) {
+function getSendGridClient() {
+  if (!config.mail.sendgridApiKey) {
     return null;
   }
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.mail.smtpHost,
-      port: config.mail.smtpPort,
-      secure: config.mail.smtpSecure,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
-  }
-  return transporter;
+  sgMail.setApiKey(config.mail.sendgridApiKey);
+  return sgMail;
 }
 
-function resolveFrom() {
+function getFromEmail() {
   if (config.mail.from) {
     return config.mail.from;
   }
-  return `"${config.mail.fromName}" <${config.mail.smtpUser}>`;
+  return config.mail.sendgridFromEmail || 'noreply@xplorenow.app';
 }
 
 async function sendMail(to, subject, html) {
-  const transport = getTransporter();
-  if (!transport) {
+  const client = getSendGridClient();
+  if (!client) {
     return false;
   }
-  await transport.sendMail({
-    from: resolveFrom(),
-    to,
-    subject,
-    html,
-  });
-  return true;
+
+  try {
+    await client.send({
+      to,
+      from: getFromEmail(),
+      subject,
+      html,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error enviando email con SendGrid:', error);
+    throw error;
+  }
 }
 
 export async function sendOtpEmail(to, otpCode) {
-  const transport = getTransporter();
-  if (!transport) {
+  const client = getSendGridClient();
+  if (!client) {
     console.warn(
-      'SMTP no configurado (SMTP_USER / SMTP_PASS). OTP solo en consola:',
+      '⚠️  SendGrid no configurado. OTP en consola:',
       otpCode,
+      '\n📝 Configura SENDGRID_API_KEY en .env para enviar por email real'
     );
     return { success: true, simulated: true };
   }
@@ -56,7 +50,7 @@ export async function sendOtpEmail(to, otpCode) {
   const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Código de verificación</h2>
-        <p>Tu código para iniciar sesión es:</p>
+        <p>Tu código para iniciar sesión en XploreNow es:</p>
         <p style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #2563eb;">
           ${otpCode}
         </p>
@@ -66,33 +60,33 @@ export async function sendOtpEmail(to, otpCode) {
     `;
 
   try {
-    await sendMail(to, 'Tu código de verificación', html);
+    await sendMail(to, 'Tu código de verificación - XploreNow', html);
     return { success: true };
   } catch (err) {
-    console.error('Error enviando OTP por SMTP:', err);
+    console.error('❌ Error enviando OTP:', err?.message || err);
     throw new Error(err?.message || 'Error al enviar el email');
   }
 }
 
 export async function sendWelcomeEmail(to, name) {
-  if (!getTransporter()) {
-    console.warn('SMTP no configurado. Email de bienvenida no enviado.');
+  if (!getSendGridClient()) {
+    console.warn('⚠️  SendGrid no configurado. Email de bienvenida no enviado.');
     return { success: true, simulated: true };
   }
 
   const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">¡Bienvenido${name ? `, ${name}` : ''}!</h2>
-        <p>Tu cuenta ha sido creada correctamente.</p>
+        <p>Tu cuenta en XploreNow ha sido creada correctamente.</p>
         <p>Ya podés iniciar sesión solicitando un código OTP a tu email.</p>
       </div>
     `;
 
   try {
-    await sendMail(to, '¡Bienvenido!', html);
+    await sendMail(to, '¡Bienvenido a XploreNow!', html);
     return { success: true };
   } catch (err) {
-    console.error('Error al enviar email de bienvenida:', err);
+    console.error('❌ Error al enviar email de bienvenida:', err);
     return { success: false };
   }
 }

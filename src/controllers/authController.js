@@ -85,17 +85,65 @@ export async function sendOtp(req, res) {
 
     const normalized = email.toLowerCase().trim();
     const { otp } = otpService.createOtp(normalized);
-    await emailService.sendOtpEmail(normalized, otp);
+    
+    try {
+      await emailService.sendOtpEmail(normalized, otp);
+    } catch (emailError) {
+      console.error('Error enviando email OTP:', emailError);
+      return res.status(500).json({
+        success: false,
+        error: 'No se pudo enviar el código. Verifica que SMTP esté configurado en .env',
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: 'Si el correo es válido, recibirás un código en los próximos minutos.',
     });
   } catch (error) {
-    console.error('Error enviando OTP:', error);
+    console.error('Error en sendOtp:', error);
     return res.status(500).json({
       success: false,
       error: error?.message || 'No se pudo enviar el código',
+    });
+  }
+}
+
+export async function resendOtp(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email inválido',
+      });
+    }
+
+    const normalized = email.toLowerCase().trim();
+    
+    // Generar nuevo OTP
+    const { otp } = otpService.createOtp(normalized);
+    
+    try {
+      await emailService.sendOtpEmail(normalized, otp);
+    } catch (emailError) {
+      console.error('Error enviando email OTP:', emailError);
+      return res.status(500).json({
+        success: false,
+        error: 'No se pudo enviar el código. Verifica que SMTP esté configurado en .env',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Se ha enviado un nuevo código a tu email.',
+    });
+  } catch (error) {
+    console.error('Error en resendOtp:', error);
+    return res.status(500).json({
+      success: false,
+      error: error?.message || 'No se pudo reenviar el código',
     });
   }
 }

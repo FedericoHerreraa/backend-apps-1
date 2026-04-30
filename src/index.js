@@ -38,6 +38,7 @@ app.get('/', (req, res) => {
       register: 'POST /auth/register',
       login: 'POST /auth/login',
       otpSend: 'POST /auth/otp/send { email }',
+      otpResend: 'POST /auth/otp/resend { email } — Reenviar si expiró',
       otpVerify: 'POST /auth/otp/verify { email, code }',
       me: 'GET /auth/me',
       actividades: 'GET /actividades (cada actividad incluye fecha: ISO 8601 o null)',
