@@ -138,6 +138,18 @@ export async function getUserByIdToken(idToken) {
   };
 }
 
+export async function exchangeCustomTokenForIdToken(customToken) {
+  const data = await firebaseAuthRequest('signInWithCustomToken', {
+    token: customToken,
+    returnSecureToken: true,
+  });
+  return {
+    idToken: data.idToken,
+    refreshToken: data.refreshToken,
+    expiresIn: data.expiresIn,
+  };
+}
+
 export function getReadableFirebaseError(error) {
   return mapFirebaseError(error);
 }

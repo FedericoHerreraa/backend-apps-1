@@ -1,5 +1,6 @@
 import { getAuth } from './firebaseAdmin.js';
 import * as firestoreUserService from './firestoreUserService.js';
+import * as firebaseAuthService from './firebaseAuthService.js';
 
 
 export async function createSessionAfterOtpVerified(email) {
@@ -25,9 +26,12 @@ export async function createSessionAfterOtpVerified(email) {
   });
 
   const customToken = await auth.createCustomToken(userRecord.uid);
+  const { idToken, refreshToken, expiresIn } = await firebaseAuthService.exchangeCustomTokenForIdToken(customToken);
 
   return {
-    customToken,
+    idToken,
+    refreshToken,
+    expiresIn,
     user: profile,
   };
 }
