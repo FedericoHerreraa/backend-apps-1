@@ -129,12 +129,14 @@ export async function verifyOtpAndSignIn(req, res) {
       });
     }
 
-    const { customToken, user } = await otpSessionService.createSessionAfterOtpVerified(normalized);
+    const { idToken, refreshToken, expiresIn, user } = await otpSessionService.createSessionAfterOtpVerified(normalized);
 
     return res.status(200).json({
       success: true,
       message: 'Inicio de sesión correcto',
-      customToken,
+      idToken,
+      refreshToken,
+      expiresIn,
       user,
     });
   } catch (error) {
