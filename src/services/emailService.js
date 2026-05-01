@@ -1,18 +1,47 @@
 import nodemailer from 'nodemailer';
+import { promises as dns } from 'node:dns';
 import { config } from '../config/index.js';
 
 let transporter = null;
+let resolvedSmtpHost = null;
 
-function getTransporter() {
+async function resolveSmtpHost() {
+  const { smtpHost, smtpForceIpv4 } = config.mail;
+  if (!smtpForceIpv4 || !smtpHost) {
+    return smtpHost;
+  }
+  if (resolvedSmtpHost) {
+    return resolvedSmtpHost;
+  }
+  try {
+    const ipv4Addresses = await dns.resolve4(smtpHost);
+    if (ipv4Addresses.length > 0) {
+      resolvedSmtpHost = ipv4Addresses[0];
+      return resolvedSmtpHost;
+    }
+  } catch (error) {
+    console.warn(`No se pudo resolver IPv4 para ${smtpHost}. Se usa host original.`, error?.message || error);
+  }
+  return smtpHost;
+}
+
+async function getTransporter() {
   const { smtpUser, smtpPass } = config.mail;
   if (!smtpUser || !smtpPass) {
     return null;
   }
   if (!transporter) {
+    const host = await resolveSmtpHost();
     transporter = nodemailer.createTransport({
-      host: config.mail.smtpHost,
+      host,
       port: config.mail.smtpPort,
       secure: config.mail.smtpSecure,
+      connectionTimeout: config.mail.smtpConnectionTimeoutMs,
+      greetingTimeout: config.mail.smtpGreetingTimeoutMs,
+      socketTimeout: config.mail.smtpSocketTimeoutMs,
+      tls: {
+        servername: config.mail.smtpHost,
+      },
       auth: {
         user: smtpUser,
         pass: smtpPass,
@@ -30,7 +59,7 @@ function resolveFrom() {
 }
 
 async function sendMail(to, subject, html) {
-  const transport = getTransporter();
+  const transport = await getTransporter();
   if (!transport) {
     return false;
   }
@@ -44,7 +73,7 @@ async function sendMail(to, subject, html) {
 }
 
 export async function sendOtpEmail(to, otpCode) {
-  const transport = getTransporter();
+  const transport = await getTransporter();
   if (!transport) {
     console.warn(
       'SMTP no configurado (SMTP_USER / SMTP_PASS). OTP solo en consola:',
@@ -75,7 +104,7 @@ export async function sendOtpEmail(to, otpCode) {
 }
 
 export async function sendWelcomeEmail(to, name) {
-  if (!getTransporter()) {
+  if (!await getTransporter()) {
     console.warn('SMTP no configurado. Email de bienvenida no enviado.');
     return { success: true, simulated: true };
   }
