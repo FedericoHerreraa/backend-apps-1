@@ -34,6 +34,15 @@ export async function getReservasByUserId(userId) {
 export async function createReserva(userId, data) {
   const db = getFirestore();
 
+  const actividadRef = db.collection(ACTIVIDADES_COLLECTION).doc(String(data.actividadId));
+  const actividadSnap = await actividadRef.get();
+
+  if (actividadSnap.data().cuposDisponibles < data.cantidadParticipantes) {
+    const err = new Error('Sin cupos disponibles');
+    err.statusCode = 400;
+    throw err;
+  }
+
   const nuevaReserva = {
     ...data,
     estado: 'confirmada',
@@ -42,6 +51,10 @@ export async function createReserva(userId, data) {
   };
 
   const reservaRef = await db.collection(RESERVAS_COLLECTION).add(nuevaReserva);
+
+  await actividadRef.update({
+    cuposDisponibles: FieldValue.increment(-data.cantidadParticipantes),
+  });
 
   const reservaSnap = await reservaRef.get();
   return { id: reservaRef.id, ...reservaSnap.data() };
