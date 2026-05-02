@@ -37,14 +37,14 @@ export async function addFavorito(userId, actividadId) {
     userId,
     actividadId: actividad.id ?? Number(actividadId),
     precioAlGuardar: actividad.precio ?? null,
-    cuposAlGuardar: actividad.cupos_disponibles ?? null,
+    cuposAlGuardar: actividad.cuposDisponibles ?? actividad.cupos_disponibles ?? null,
     creadoEn: FieldValue.serverTimestamp(),
   });
 
   return {
     actividadId: actividad.id ?? Number(actividadId),
     precioAlGuardar: actividad.precio ?? null,
-    cuposAlGuardar: actividad.cupos_disponibles ?? null,
+    cuposAlGuardar: actividad.cuposDisponibles ?? actividad.cupos_disponibles ?? null,
   };
 }
 
@@ -88,7 +88,7 @@ export async function listFavoritosByUser(userId) {
 
       const actividad = actividadSnap.data();
       const precioActual = actividad.precio;
-      const cuposActuales = actividad.cupos_disponibles;
+      const cuposActuales = actividad.cuposDisponibles ?? actividad.cupos_disponibles;
 
       const precioBajo = precioActual < fav.precioAlGuardar;
       const cuposLiberados = cuposActuales > fav.cuposAlGuardar;
