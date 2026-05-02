@@ -1,6 +1,14 @@
 import { normalizeActividadForApi } from '../schemas/actividad.js';
 import { getFirestore } from './firebaseAdmin.js';
 
+const PREFERENCIA_A_CATEGORIAS = {
+  aventura: ['aventura'],
+  cultura: ['visita guiada', 'free tour'],
+  gastronomia: ['experiencia gastronómica'],
+  naturaleza: ['excursión'],
+  relax: [],
+};
+
 export async function getAllActividades() {
   const db = getFirestore();
   const snapshot = await db.collection('actividades').get();
@@ -23,9 +31,17 @@ export async function actividadExistsById(rawId) {
 }
 
 export async function getActividadesByPreferencias(preferencias) {
+  const categoriasObjetivo = preferencias.flatMap(
+    (p) => PREFERENCIA_A_CATEGORIAS[p] || [],
+  );
+
+  if (categoriasObjetivo.length === 0) {
+    return [];
+  }
+
   const db = getFirestore();
   const snapshot = await db.collection('actividades').get();
   return snapshot.docs
     .map((doc) => normalizeActividadForApi(doc.data()))
-    .filter((a) => preferencias.includes(a.categoria));
+    .filter((a) => categoriasObjetivo.includes(a.categoria));
 }
